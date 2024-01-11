@@ -1,36 +1,27 @@
 pipeline {
     agent any
-
-    environment {
-        myVar = 'initial_value'
-    }
-
     stages {
-        stage('one') {
-            steps {
-                script {
-                    echo "1.1. ${env.myVar}" // prints '1.1. initial_value'
-                    sh 'echo hotness > myfile.txt'
-                    // OPTION 1: set variable by reading from file.
-                    // FYI, trim removes leading and trailing whitespace from the string
-                    env.myVar = readFile('myfile.txt').trim()
-                    echo "1.2. ${env.myVar}" // prints '1.2. hotness'
+        stage(‘Stages Running in Parallel’) {
+            failFast true
+            parallel {
+                stage(‘Stage1’) {
+                    steps {
+                        echo “Stage1 executing”
+                        sleep 10
+                    }
                 }
-            }
-        }
-        stage('two') {
-            steps {
-                echo "2.1 ${env.myVar}" // prints '2.1. hotness'
-                sh "echo 2.2. sh ${env.myVar}, Sergio" // prints '2.2. sh hotness, Sergio'
-            }
-        }
-        // this stage is skipped due to the when expression, so nothing is printed
-        stage('three') {
-            when {
-                expression { env.myVar != 'hotness' }
-            }
-            steps {
-                echo "three: ${env.myVar}"
+                stage(‘Stage2’) {
+                    steps {
+                        echo “Stage2 executing”
+                        sleep 10
+                    }
+                }
+                stage(‘Stage3’) {
+                    steps {
+                        echo “Stage3 executing”
+                        sleep 10
+                    }
+                }
             }
         }
     }
